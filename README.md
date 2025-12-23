@@ -1,135 +1,130 @@
-# Turborepo starter
+# TailwindSQL
 
-This Turborepo starter is maintained by the Turborepo core team.
+> ⚠️ **DRAFT — NOT READY FOR PRODUCTION**
+> This project is under active development. APIs may change without notice.
 
-## Using this example
+SQL queries with Tailwind-like syntax.
 
-Run the following command:
+🌐 **Website:** [tailwindsql.com](https://tailwindsql.com)
+📦 **Repository:** [github.com/ptaberg/tailwindsql](https://github.com/ptaberg/tailwindsql)
 
-```sh
-npx create-turbo@latest
+---
+
+## What is TailwindSQL?
+
+TailwindSQL lets you write SQL queries using a familiar utility-class syntax inspired by Tailwind CSS.
+
+```jsx
+// Instead of this:
+const sql = "SELECT * FROM User WHERE age > 18 ORDER BY name LIMIT 10";
+
+// Write this:
+<QueryBlock query="select-all from-[User] where-[age>18] orderby-[name] limit-[10]" />
 ```
 
-## What's inside?
+## Syntax
 
-This Turborepo includes the following packages/apps:
+| TailwindSQL Token       | SQL Output          |
+|-------------------------|---------------------|
+| `select-all`            | `SELECT *`          |
+| `select-[id,name]`      | `SELECT id, name`   |
+| `from-[users]`          | `FROM users`        |
+| `where-[age>18]`        | `WHERE age>18`      |
+| `orderby-[created_at]`  | `ORDER BY created_at` |
+| `limit-[10]`            | `LIMIT 10`          |
+| `offset-[5]`            | `OFFSET 5`          |
+| `join-[posts]`          | `JOIN posts`        |
+| `on-[users.id=posts.user_id]` | `ON users.id=posts.user_id` |
+| `groupby-[status]`      | `GROUP BY status`   |
+| `having-[count>5]`      | `HAVING count>5`    |
 
-### Apps and Packages
+## Quick Start
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+```tsx
+import { QueryBlock, createPrismaAdapter } from "@repo/tailwindsql";
+import { prisma } from "./db";
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+const adapter = createPrismaAdapter(prisma);
 
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
-```
-
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
+export function UserList() {
+  return (
+    <QueryBlock
+      query="select-[id,name,email] from-[User]"
+      adapter={adapter}
+    >
+      {(users) => (
+        <ul>
+          {users.map((user) => (
+            <li key={user.id}>{user.name}</li>
+          ))}
+        </ul>
+      )}
+    </QueryBlock>
+  );
+}
 ```
 
-### Develop
+## Parser Only
 
-To develop all apps and packages, run the following command:
+Use the parser directly without React:
 
+```ts
+import { parseTailwindSQL } from "@repo/tailwindsql";
+
+parseTailwindSQL("select-all from-[User] where-[id=1]");
+// → "SELECT * FROM User WHERE id=1"
 ```
-cd my-turborepo
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
+## Adapters
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
+### Prisma
+
+```ts
+import { createPrismaAdapter } from "@repo/tailwindsql";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
+const adapter = createPrismaAdapter(prisma);
+```
+
+### Custom Adapter
+
+Any function matching `(sql: string) => Promise<unknown[]>` works:
+
+```ts
+const customAdapter = async (sql: string) => {
+  const result = await myDatabase.execute(sql);
+  return result.rows;
+};
+```
+
+## Development
+
+```bash
+# Install dependencies
+npm install
+
+# Run development server
 npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
+
+# Build
+npx turbo build
 ```
 
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+## Project Structure
 
 ```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
+├── apps/
+│   ├── web/          # Demo app
+│   └── docs/         # Documentation site
+├── packages/
+│   └── tailwindsql/  # Core library
+│       ├── parser.ts           # TailwindSQL → SQL parser
+│       ├── QueryBlock.tsx      # React component exports
+│       └── QueryBlock.client.tsx  # Client component
 ```
 
-### Remote Caching
+---
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+**Status:** 🚧 Draft
+**License:** MIT
