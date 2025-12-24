@@ -132,3 +132,7 @@ npx turbo build
 
 **Status:** 🚧 Draft
 **License:** MIT
+
+---
+
+Inspired by [mmarinovic/tailwindsql](https://github.com/mmarinovic/tailwindsql)
