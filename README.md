@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="./Tailwind SQL Logo.svg" alt="TailwindSQL Logo" width="120" height="120" />
+</p>
+
 # TailwindSQL
 
 > ⚠️ **DRAFT — NOT READY FOR PRODUCTION**

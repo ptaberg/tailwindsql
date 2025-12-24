@@ -1,13 +1,3 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// Types
-// ─────────────────────────────────────────────────────────────────────────────
-
-export type SQLAdapter = (sql: string) => Promise<unknown[]>;
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Parser: TailwindSQL → SQL
-// ─────────────────────────────────────────────────────────────────────────────
-
 const TOKEN_PATTERNS: Record<string, (value: string) => string> = {
   "select-all": () => "SELECT *",
   "select-\\[(.+?)\\]": (cols) =>
@@ -48,15 +38,3 @@ export function parseTailwindSQL(query: string): string {
 
   return sqlParts.join(" ");
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Utilities
-// ─────────────────────────────────────────────────────────────────────────────
-
-/** Create a Prisma adapter from a Prisma client instance */
-export function createPrismaAdapter(prisma: {
-  $queryRawUnsafe: (sql: string) => Promise<unknown[]>;
-}): SQLAdapter {
-  return (sql: string) => prisma.$queryRawUnsafe(sql);
-}
-

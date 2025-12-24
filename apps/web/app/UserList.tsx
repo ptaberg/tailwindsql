@@ -1,9 +1,8 @@
-import { QueryBlock } from "@repo/tailwindsql/QueryBlock";
-import { tailwindSQL } from "../tailwindsql.config";
+import { QueryBlock } from "../tailwindsql.config";
 
 export function UserList() {
   return (
-    <QueryBlock query="select-[id,name,email] from-[User]" adapter={tailwindSQL.adapter}>
+    <QueryBlock query="select-[id,name,email] from-[User]">
       {(users) => (
         <ul className="space-y-2">
           {users.map((user: any) => (
@@ -22,6 +21,6 @@ export function UserList() {
 }
 
 export function AllUsers() {
-  return <QueryBlock query="select-all from-[User]" adapter={tailwindSQL.adapter} />;
+  return <QueryBlock query="select-all from-[User]" />;
 }
 

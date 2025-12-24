@@ -7,4 +7,3 @@ export async function executeSQL(sql: string): Promise<unknown[]> {
   const result = await prisma.$queryRawUnsafe(sql);
   return result as unknown[];
 }
-

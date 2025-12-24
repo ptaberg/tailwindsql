@@ -1,27 +1,26 @@
 import { type ReactNode } from "react";
-import { parseTailwindSQL, type SQLAdapter } from "./parser";
+import { parseTailwindSQL } from "../parser";
+import type { SQLAdapter } from "../types";
 
 export interface QueryBlockProps {
-  /** TailwindSQL query string e.g. "select-all from-[users] where-[age>18]" */
   query: string;
-  /** Adapter function that executes raw SQL and returns results */
   adapter: SQLAdapter;
-  /** Render function for results. If omitted, renders JSON */
   children?: (data: unknown[]) => ReactNode;
 }
 
-export async function QueryBlock({ query, adapter, children }: QueryBlockProps) {
+export const QueryBlock = async ({
+  query,
+  adapter,
+  children,
+  ...props
+}: QueryBlockProps) => {
   const sql = parseTailwindSQL(query);
 
   try {
     const data = await adapter(sql);
 
     if (children) {
-      return (
-        <div className="tailwindsql-block" data-sql={sql}>
-          {children(data)}
-        </div>
-      );
+      return <>{children(data)}</>;
     }
 
     return (
@@ -38,5 +37,4 @@ export async function QueryBlock({ query, adapter, children }: QueryBlockProps) 
       </div>
     );
   }
-}
-
+};

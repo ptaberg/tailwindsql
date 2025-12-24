@@ -3,7 +3,12 @@
   "version": "0.0.0",
   "private": true,
   "exports": {
-    "./*": "./src/*.tsx"
+    ".": "./src/index.tsx",
+    "./src/parser": "./src/parser.ts",
+    "./src/server/config": "./src/server/config.tsx",
+    "./src/server/QueryBlock": "./src/server/QueryBlock.tsx",
+    "./src/types": "./src/types/index.ts",
+    "./src/utils/adapters": "./src/utils/adapters.ts"
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",
